@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Map generator</title>
+		<meta charset="utf-8">
+		<style type="text/css">
+			body{
+				padding: 0px;
+				margin: 0px;
+			}
+
+			#maptd{
+				width: 700px;
+			}
+
+			#texttd{
+				width: 100px;
+			}
+
+			h5{
+				padding: 0;
+				margin: 0;
+				padding-bottom: 0px;
+			}
+
+			.slider{
+				padding-top: 10px;
+				width: 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<table width="100%">
+			<tr>
+				<td id="maptd">
+					<canvas id="map"></canvas>
+				</td>
+				<td id="texttd">
+					<b><h5>sea level:</h5></b><br>
+					<b><h5>amp falloff:</h5></b><br>
+					<b><h5>quality:</h5></b><br>
+					<b><h5>move speed:</h5></b><br>
+				</td>
+				<td id="slidertd">
+					<input type="range" min="0" max="1" value="0.6" class="slider" step="0.01" id="trigger">
+					<input type="range" min="0" max="1" value="0.5" class="slider" step="0.01" id="ampfalloff">
+					<input type="range" min="1" max="20" value="8" class="slider" step="1" id="quality">
+					<input type="range" min="1" max="10" value="4" class="slider" step="0.01" id="move speed">
+				</td>
+			</tr>
+		</table>
+		<script type="text/javascript" src="main.js"></script>
+	</body>
+</html>
