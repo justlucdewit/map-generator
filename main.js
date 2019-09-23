@@ -1,3 +1,30 @@
+function RNG(seed) {
+  // LCG using GCC's constants
+  this.m = 0x80000000; // 2**31;
+  this.a = 1103515245;
+  this.c = 12345;
+
+  this.state = seed ? seed : Math.floor(Math.random() * (this.m - 1));
+}
+RNG.prototype.nextInt = function() {
+  this.state = (this.a * this.state + this.c) % this.m;
+  return this.state;
+}
+RNG.prototype.nextFloat = function() {
+  // returns in range [0,1]
+  return this.nextInt() / (this.m - 1);
+}
+RNG.prototype.nextRange = function(start, end) {
+  // returns in range [start, end): including start, excluding end
+  // can't modulu nextInt because of weak randomness in lower bits
+  var rangeSize = end - start;
+  var randomUnder1 = this.nextInt() / this.m;
+  return start + Math.floor(randomUnder1 * rangeSize);
+}
+RNG.prototype.choice = function(array) {
+  return array[this.nextRange(0, array.length)];
+}
+
 var PERLIN_YWRAPB = 4;
 var PERLIN_YWRAP = 1 << PERLIN_YWRAPB;
 var PERLIN_ZWRAPB = 8;
@@ -7,6 +34,7 @@ var perlin_octaves = 4;
 var perlin_amp_falloff = 0.5;
 
 seed = []
+myrng = new RNG(Math.round(Math.random())*999999999999999999999999999999999999999999999999999999999999999999999999999999999999999);
 
 var scaled_cosine = function scaled_cosine(i) {
 	return 0.5 * (1.0 - Math.cos(i * Math.PI));
@@ -22,7 +50,7 @@ function noise(x, y, z) {
 		perlin = new Array(PERLIN_SIZE + 1);
 		for (var i = 0; i < PERLIN_SIZE + 1; i++) {
 			
-			r = Math.random();
+			r = myrng.nextFloat();
 			perlin[i] = r;
 			seed.push(r)
 		}
@@ -109,7 +137,9 @@ let moveSpeedSlider = document.getElementById("move speed");
 
 //dom events
 triggerSlider.oninput = function(){
-	trigger = this.value;
+	sandtrigger = this.value;
+	grasstrigger = this.value+0.05;
+	snowtrigger = this.value+0.15;
 }
 
 ampfalloffSlider.oninput = function(){
@@ -145,7 +175,10 @@ let xoff = 0;
 let yoff = 0;
 let speed = 4;
 let zoom = 0.01;
-let trigger = 0.6;
+
+let sandtrigger = 0.6
+let grasstrigger = sandtrigger+0.05;
+let snowtrigger = sandtrigger+0.15;
 
 var keys = {};
 window.onkeyup = function(e) { keys[e.keyCode] = false; }
@@ -183,8 +216,15 @@ function drawLand(){
 	for (let x = 0; x < canvas.width; x+=quality){
 		for (let y = 0; y < canvas.height; y+=quality){
 			ctx.fillStyle = "#2FC816";
-			if (noise((x+xoff)*zoom, (y+yoff)*zoom)>trigger){
-				ctx.fillStyle = "rgb(0, "+map(noise((x+xoff)*0.01, (y+yoff)*0.01), 0, 1, 255, 0)+",0)"
+			value = noise((x+xoff)*zoom, (y+yoff)*zoom);
+			if(value>snowtrigger){
+				ctx.fillStyle = "rgb(255, 255, 255)";
+				ctx.fillRect(x, y, quality, quality);
+			}else if (value>grasstrigger){
+				ctx.fillStyle = "rgb(0, "+map(value, 0, 1, 255, 0)+",0)";
+				ctx.fillRect(x, y, quality, quality);
+			}else if (value>sandtrigger) {
+				ctx.fillStyle = "#E9E75D";
 				ctx.fillRect(x, y, quality, quality);
 			}
 		}
@@ -201,10 +241,10 @@ function exportOBJ(){
 	for (let x = 0; x < canvas.width; x+=quality){
 		for (let y = 0; y < canvas.height; y+=quality){
 			let string = "v "+x+" "+y+" ";
-			if (noise((x+xoff)*zoom, (y+yoff)*zoom)>trigger){
+			if (noise((x+xoff)*zoom, (y+yoff)*zoom)>grasstrigger){
 				string+=map(noise((x+xoff)*0.01, (y+yoff)*0.01), 0, 1, maxheight, 0)
 			}else{
-				string+=map(trigger, 0, 1, maxheight, 0);
+				string+=map(grasstrigger, 0, 1, maxheight, 0);
 			}
 			txt+=string+"\n";
 		}
@@ -221,19 +261,15 @@ function exportOBJ(){
 			
 
 			if (c4 >= 7744){
-				console.log("OH NO", c4);
 				c4 = 0;
 			}
 			if (c3 >= 7744){
-				console.log("OH NO", c3);
 				c3 = 0;
 			}
 			if (c1 >= 7655){
-				console.log("OH NO", c1);
 				c1 = 0;
 			}
 			if (c2 >= 7656){
-				console.log("OH NO", c2);
 				c2 = 0;
 			}
 
@@ -243,7 +279,89 @@ function exportOBJ(){
 			}
 		}
 	}
-	console.log(txt);
+	return txt;
 }
 
-exportOBJ()
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
+
+//exportOBJ()
+function setseed(){
+	let str = document.getElementById('seed').value;
+	console.log(str.value);
+	str = str.replaceAll("a", 1);
+	str = str.replaceAll("b", 2);
+	str = str.replaceAll("c", 3);
+	str = str.replaceAll("d", 4);
+	str = str.replaceAll("e", 5);
+	str = str.replaceAll("f", 6);
+	str = str.replaceAll("g", 7);
+	str = str.replaceAll("h", 8);
+	str = str.replaceAll("i", 9);
+	str = str.replaceAll("j", 10);
+	str = str.replaceAll("k", 11);
+	str = str.replaceAll("l", 12);
+	str = str.replaceAll("m", 13);
+	str = str.replaceAll("n", 14);
+	str = str.replaceAll("o", 15);
+	str = str.replaceAll("p", 16);
+	str = str.replaceAll("q", 17);
+	str = str.replaceAll("r", 18);
+	str = str.replaceAll("s", 19);
+	str = str.replaceAll("t", 20);
+	str = str.replaceAll("u", 21);
+	str = str.replaceAll("v", 22);
+	str = str.replaceAll("w", 23);
+	str = str.replaceAll("x", 24);
+	str = str.replaceAll("y", 25);
+	str = str.replaceAll("z", 26);
+	str = str.replaceAll("A", 27);
+	str = str.replaceAll("B", 28);
+	str = str.replaceAll("C", 29);
+	str = str.replaceAll("D", 30);
+	str = str.replaceAll("E", 31);
+	str = str.replaceAll("F", 32);
+	str = str.replaceAll("G", 33);
+	str = str.replaceAll("H", 34);
+	str = str.replaceAll("I", 35);
+	str = str.replaceAll("J", 36);
+	str = str.replaceAll("K", 37);
+	str = str.replaceAll("L", 38);
+	str = str.replaceAll("M", 39);
+	str = str.replaceAll("N", 40);
+	str = str.replaceAll("O", 41);
+	str = str.replaceAll("P", 42);
+	str = str.replaceAll("Q", 43);
+	str = str.replaceAll("R", 44);
+	str = str.replaceAll("S", 45);
+	str = str.replaceAll("T", 46);
+	str = str.replaceAll("U", 47);
+	str = str.replaceAll("V", 48);
+	str = str.replaceAll("W", 49);
+	str = str.replaceAll("X", 50);
+	str = str.replaceAll("Y", 51);
+	str = str.replaceAll("Z", 52);
+	str = str.replaceAll(" ", 53);
+	perlin = null;
+	myrng = new RNG(parseInt(str));
+}
+
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+function downloadObject(){
+	let txt = exportOBJ();
+	download("terrainModel.obj", txt);
+}

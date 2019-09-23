@@ -1,0 +1,4 @@
+-fix .obj file output
+-make movement center focused
+-create biomes generation
+-create structure spawing
