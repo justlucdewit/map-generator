@@ -137,9 +137,9 @@ let moveSpeedSlider = document.getElementById("move speed");
 
 //dom events
 triggerSlider.oninput = function(){
-	sandtrigger = this.value;
-	grasstrigger = this.value+0.05;
-	snowtrigger = this.value+0.15;
+	sandtrigger = parseFloat(this.value);
+	grasstrigger = parseFloat(this.value)+0.05;
+	snowtrigger = parseFloat(this.value)+0.15;
 }
 
 ampfalloffSlider.oninput = function(){
@@ -217,7 +217,7 @@ function drawLand(){
 		for (let y = 0; y < canvas.height; y+=quality){
 			ctx.fillStyle = "#2FC816";
 			value = noise((x+xoff)*zoom, (y+yoff)*zoom);
-			if(value>snowtrigger){
+			if(value>snowtrigger ){
 				ctx.fillStyle = "rgb(255, 255, 255)";
 				ctx.fillRect(x, y, quality, quality);
 			}else if (value>grasstrigger){
@@ -363,5 +363,6 @@ function download(filename, text) {
 
 function downloadObject(){
 	let txt = exportOBJ();
-	download("terrainModel.obj", txt);
+	download("terrainModel", txt);
+	alert("to view the model, please rename \nterrainModel.txt to terrainModel.obj")
 }
