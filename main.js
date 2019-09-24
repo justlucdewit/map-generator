@@ -185,14 +185,6 @@ window.onkeyup = function(e) { keys[e.keyCode] = false; }
 window.onkeydown = function(e) { keys[e.keyCode] = true; }
 
 function drawLand(){
-	if (xoff < 0){
-		xoff = 0;
-	}
-
-	if (yoff < 0){
-		yoff = 0
-	}
-
 	if (keys[83]){
 		yoff+=quality*speed;
 	}
@@ -210,6 +202,13 @@ function drawLand(){
 	}
 	if (keys[70]){
 		zoom *= 0.95
+	}
+	if (xoff < 0){
+		xoff = 0;
+	}
+
+	if (yoff < 0){
+		yoff = 0
 	}
 	ctx.fillStyle = "#170DE0";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
